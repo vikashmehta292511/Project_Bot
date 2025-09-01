@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A.R.C. - (Advanced Response Companion)</title>
+    <style>
+        /* General styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #0f0f1e;
+            color: #f8f8f2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        h1 {
+            margin: 10px 0;
+            font-size: 3rem;
+            font-weight: bold;
+            text-align: center;
+            color: #f8f8f2;
+            text-shadow: 0px 0px 10px #f8f8f2;
+        }
+
+        #chat-container {
+            width: 90%;
+            max-width: 500px;
+            border: 2px solid #f8f8f2;
+            border-radius: 15px;
+            background: #101020;
+            box-shadow: 0px 0px 15px rgba(248, 248, 242, 0.5);
+            display: flex;
+            flex-direction: column;
+        }
+
+        #chatbox {
+            height: 400px;
+            padding: 10px;
+            overflow-y: auto;
+            background: #0d0d1a;
+            color: #f8f8f2;
+            border-bottom: 2px solid #f8f8f2;
+            white-space: pre-wrap; /* Allows the response to wrap into multiple lines */
+        }
+
+        .message {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 10px;
+            max-width: 75%;
+            line-height: 1.4;
+        }
+
+        .user-message {
+            background: #202040;
+            align-self: flex-end;
+            color: #1ed1ff;
+            box-shadow: 0 0 10px #1ed1ff;
+        }
+
+        .bot-message {
+            background: #111146;
+            align-self: flex-start;
+            color: #f8f8f2; /* Yellow color for bot response */
+            font-family: monospace;
+            box-shadow: 0 0 10px #f8f8f2;
+            animation: fadeIn 2s ease-in-out; /* Simple fade-in animation */
+            white-space: pre-wrap;
+            word-wrap: break-word; /* Allows wrapping in response */
+        }
+
+        .error-message {
+            background: #442020;
+            align-self: flex-start;
+            color: #ff6b6b;
+            font-family: monospace;
+            box-shadow: 0 0 10px #ff6b6b;
+            border: 1px solid #ff6b6b;
+        }
+
+        .loading-message {
+            background: #202040;
+            align-self: flex-start;
+            color: #888;
+            font-style: italic;
+            opacity: 0.7;
+        }
+
+        /* Simple fade-in animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        #chat-form {
+            display: flex;
+            border-radius: 15px;
+            padding: 10px;
+            background: #101020;
+        }
+
+        #user-input {
+            flex-grow: 1;
+            padding: 10px;
+            border: 2px solid #f8f8f2;
+            border-radius: 10px;
+            background: #0d0d1a;
+            color: #f8f8f2;
+            font-family: 'Arial', sans-serif;
+        }
+
+        #user-input:focus {
+            outline: 1px solid #1ed1ff;
+            box-shadow: 0 0 10px #1ed1ff;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin-left: 10px;
+            border: none;
+            border-radius: 10px;
+            background: #1ed1ff;
+            color: #0d1117;
+            cursor: pointer;
+            font-weight: bold;
+            text-shadow: 0px 0px 5px #1ed1ff;
+        }
+
+        button:hover {
+            background: #00ffe0;
+            color: #0f0f1e;
+        }
+
+        button:disabled {
+            background: #666;
+            color: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Marquee footer note */
+        .footer-note {
+            margin-top: 20px;
+            font-size: 1rem;
+            text-align: center;
+            color: #f8f8f2;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .footer-note marquee {
+            font-size: 1rem;
+            color: #f8f8f2;
+            text-shadow: 0px 0px 8px #f8f8f2;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Responsive Companion Bot</h2> 
+    <div id="chat-container">
+        <div id="chatbox">
+            <div class="message bot-message">Hello! I'm your Responsive Companion Bot. How can I assist you sir?</div>
+        </div>
+        <form id="chat-form">
+            <input type="text" id="user-input" placeholder="Type a message..." required>
+            <button type="submit" id="send-button">Send</button>
+        </form>
+    </div>
+    <div class="footer-note">
+        <marquee scrollamount="5">Good to see u, Buddy.</marquee>
+    </div>
+
+    <script>
+        const chatbox = document.getElementById('chatbox');
+        const form = document.getElementById('chat-form');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+
+        function appendMessage(message, className) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${className}`;
+            messageDiv.textContent = message;
+            chatbox.appendChild(messageDiv);
+            chatbox.scrollTop = chatbox.scrollHeight;
+            return messageDiv;
+        }
+
+        function setLoading(isLoading) {
+            sendButton.disabled = isLoading;
+            sendButton.textContent = isLoading ? 'Sending...' : 'Send';
+            userInput.disabled = isLoading;
+        }
+
+        // Chat functionality
+        form.addEventListener('submit', async function (event) {
+            event.preventDefault();
+            const message = userInput.value.trim();
+            
+            if (!message) return;
+
+            // Add user message
+            appendMessage('You: ' + message, 'user-message');
+            userInput.value = '';
+            
+            // Show loading state
+            setLoading(true);
+            const loadingMsg = appendMessage('Bot: Thinking...', 'loading-message');
+
+            try {
+                console.log('Sending message:', message);
+                
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'user_input=' + encodeURIComponent(message)
+                });
+
+                console.log('Response status:', response.status);
+
+                const data = await response.json();
+                console.log('Response data:', data);
+
+                // Remove loading message
+                loadingMsg.remove();
+
+                if (data.response) {
+                    appendMessage('Bot: ' + data.response, 'bot-message');
+                } else {
+                    appendMessage('Bot: Sorry, I didn\'t get a proper response. Please try again.', 'error-message');
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                loadingMsg.remove();
+                appendMessage('Bot: Connection error. Please check if the server is running and try again.', 'error-message');
+            } finally {
+                setLoading(false);
+                userInput.focus();
+            }
+        });
+
+        // Focus input on page load
+        window.addEventListener('load', function() {
+            userInput.focus();
+        });
+    </script>
+</body>
+
+</html>
