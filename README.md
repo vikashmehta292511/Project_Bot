@@ -1,4 +1,4 @@
-# Gemini Flash Chatbot
+# AI Chatbot
 
 A Flask chatbot powered by Google Gemini 1.5 Flash API.  
 Chat with AI Bot directly from your browser. This project uses only the free-tier Gemini Flash API, so any no billing is required.
