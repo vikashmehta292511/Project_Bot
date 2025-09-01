@@ -7,9 +7,9 @@ Chat with AI Bot directly from your browser. This project uses only the free-tie
 
 ## Features
 - Chat with AI Bot in real-time
-- Reset conversation history
-- Free-tier with Gemini Flash
+- Free-tier uses with Gemini Flash API
 - Light Flask backend
+- Understandable code with well define comment
 
 ---
 
